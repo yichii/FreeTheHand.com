@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free the Hand — The Institute for Manual Restraint</title>
+<meta name="description" content="An official-looking PSA poster on the dangers of excessive gooning. Satire. Est. 1974.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Courier+Prime:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<main class="poster">
+
+  <!-- ===== LETTERHEAD ===== -->
+  <header class="letterhead">
+    <div class="letterhead-inner">
+      <div class="seal" aria-hidden="true">
+        <svg viewBox="0 0 200 200" width="86" height="86">
+          <circle cx="100" cy="100" r="94" fill="none" stroke="#1F1B16" stroke-width="3"/>
+          <circle cx="100" cy="100" r="82" fill="none" stroke="#1F1B16" stroke-width="1.5"/>
+          <path id="sealCircleTop" d="M 100,100 m -70,0 a 70,70 0 1,1 140,0" fill="none"/>
+          <path id="sealCircleBottom" d="M 100,100 m -70,0 a 70,70 0 1,0 140,0" fill="none"/>
+          <text font-family="Oswald, sans-serif" font-size="12.5" letter-spacing="2.5" fill="#1F1B16">
+            <textPath href="#sealCircleTop" startOffset="50%" text-anchor="middle">★ INSTITUTE FOR MANUAL RESTRAINT ★</textPath>
+          </text>
+          <text font-family="Oswald, sans-serif" font-size="12.5" letter-spacing="2.5" fill="#1F1B16">
+            <textPath href="#sealCircleBottom" startOffset="50%" text-anchor="middle">EST. 1974 · ANTI-GOONING DIV.</textPath>
+          </text>
+          <g transform="translate(100,100)">
+            <text x="0" y="-6" font-family="'Alfa Slab One', serif" font-size="34" text-anchor="middle" fill="#1F1B16">✋</text>
+            <text x="0" y="24" font-family="Oswald, sans-serif" font-size="9" font-weight="600" letter-spacing="1.5" text-anchor="middle" fill="#1F1B16">CERTIFIED</text>
+          </g>
+        </svg>
+      </div>
+      <div class="letterhead-text">
+        <p class="letterhead-eyebrow">An Official-Looking Notice From</p>
+        <h1 class="letterhead-title">THE INSTITUTE FOR<br>MANUAL RESTRAINT</h1>
+        <p class="letterhead-sub">Est. 1974 — A Public Service Division for the Chronically Gooning · Form No. HND-01 · Filed in Triplicate</p>
+      </div>
+      <div class="stamp stamp-approved" aria-hidden="true">APPROVED<br>FOR VIEWING</div>
+    </div>
+  </header>
+
+  <div class="hairline"></div>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <p class="hero-kicker">A Public Awareness Campaign</p>
+    <h2 class="hero-slogan">FREE<br>THE<br>HAND</h2>
+    <p class="hero-subhead">
+      On the dangers of excessive gooning. Every year, thousands of otherwise
+      productive citizens fall idle to the same restless appendage. The Institute
+      says: enough. Reclaim your hand for hobbies, handshakes, and honest labor.
+    </p>
+    <div class="hero-divider" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </section>
+
+  <!-- ===== INCIDENT COUNTER (signature element) ===== -->
+  <section class="counter-section" aria-labelledby="counterHeading">
+    <h3 id="counterHeading" class="section-label">Official Tally — Do Not Tamper</h3>
+
+    <div class="flip-board">
+      <p class="flip-caption">DAYS SINCE LAST GOON</p>
+      <div class="flip-digits" id="flipDigits" aria-live="polite">
+        <span class="flip-digit" id="digit0">0</span><span class="flip-digit" id="digit1">0</span><span class="flip-digit" id="digit2">0</span>
+      </div>
+      <p class="flip-footnote">Reset automatically upon confession</p>
+    </div>
+
+    <button id="reportBtn" class="report-btn" type="button">
+      REPORT A GOON
+    </button>
+
+    <div id="incidentStub" class="incident-stub hidden" role="status">
+      <div class="stub-perf" aria-hidden="true"></div>
+      <p class="stub-title">GOON REPORT — FILED</p>
+      <p class="stub-row"><span>DATE:</span> <span id="stubDate"></span></p>
+      <p class="stub-row"><span>CAUSE:</span> <span id="stubExcuse"></span></p>
+      <p class="stub-row"><span>STATUS:</span> <span>COUNTER RESET TO ZERO</span></p>
+      <div class="stub-stamp" aria-hidden="true">ON FILE</div>
+    </div>
+
+    <p class="tally-line">
+      Total goons reported to date:
+      <span id="totalIncidents" class="tally-number">0</span>
+      <span class="tally-marks" id="tallyMarks" aria-hidden="true"></span>
+    </p>
+  </section>
+
+  <div class="hairline"></div>
+
+  <!-- ===== WARNING BADGES ===== -->
+  <section class="badges-section" aria-label="Safety warnings">
+    <h3 class="section-label">Posted Warnings — Read Before Proceeding</h3>
+    <div class="badges-row">
+      <div class="badge badge-rust">
+        <div class="badge-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="40" height="40"><path d="M32 6 L58 54 H6 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><line x1="32" y1="24" x2="32" y2="38" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="46" r="2.6" fill="currentColor"/></svg>
+        </div>
+        <p class="badge-label">CAUTION<br><span>Hands At Work</span></p>
+      </div>
+      <div class="badge badge-teal">
+        <div class="badge-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="40" height="40"><circle cx="32" cy="32" r="26" fill="none" stroke="currentColor" stroke-width="4"/><line x1="14" y1="14" x2="50" y2="50" stroke="currentColor" stroke-width="4"/></svg>
+        </div>
+        <p class="badge-label">RESTRAINT REQUIRED<br><span>No Exceptions</span></p>
+      </div>
+      <div class="badge badge-mustard">
+        <div class="badge-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="40" height="40"><rect x="10" y="10" width="44" height="44" fill="none" stroke="currentColor" stroke-width="4"/><path d="M18 32 L28 42 L46 22" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="badge-label">GOONING ZONE<br><span>Beyond This Point</span></p>
+      </div>
+      <div class="badge badge-rust">
+        <div class="badge-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="40" height="40"><path d="M8 32 L32 8 L56 32 L32 56 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><text x="32" y="40" font-family="Oswald, sans-serif" font-size="26" font-weight="700" text-anchor="middle" fill="currentColor">!</text></svg>
+        </div>
+        <p class="badge-label">IDLE HANDS<br><span>Report to Supervisor</span></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="hairline"></div>
+
+  <!-- ===== PLEDGE ===== -->
+  <section class="pledge-section">
+    <h3 class="section-label">The Anti-Gooning Pledge</h3>
+    <div class="pledge-card">
+      <p class="pledge-text">
+        I, the undersigned, do solemnly and somewhat reluctantly pledge to stop
+        gooning, effective immediately or as immediately as reasonably practicable.
+        I acknowledge that idle hands are a workplace hazard, that doorknobs are not
+        a provocation, and that Tuesdays are not, in fact, an occasion.
+      </p>
+      <div class="signature-wrap">
+        <canvas id="sigCanvas" class="sig-canvas" width="600" height="140" aria-label="Signature pad — draw your signature with mouse or finger"></canvas>
+        <div class="sig-line-label">
+          <span>Sign above with mouse or finger</span>
+          <button id="clearSig" class="sig-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="pledge-footer">
+        <p class="pledge-date">Dated: <span id="pledgeDate"></span></p>
+        <div class="pledge-stamp" aria-hidden="true">ON RECORD</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="hairline"></div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p class="footer-fineprint">
+      This poster is satire and is provided for entertainment purposes only.
+      The Institute for Manual Restraint is not a real institute, division, or
+      public decency authority, and holds no medical, legal, or workplace-safety
+      credentials of any kind. No medical advice is being given, implied, or
+      filed in triplicate. Side effects of restraint from gooning may include
+      free time, eye contact, unexplained productivity, and a mild sense of
+      accomplishment. Consult absolutely no one before disregarding this
+      poster entirely.
+    </p>
+    <p class="footer-meta">Form HND-01-B · Rev. 1979 · Printed on recycled attention span · freethehand.com</p>
+  </footer>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+/* =========================================================
+   FREE THE HAND — The Institute for Manual Restraint
+   1970s OSHA-poster satirical stylesheet
+   ========================================================= */
+
+:root {
+  --cream: #F2E9D8;
+  --ink: #1F1B16;
+  --mustard: #D4A017;
+  --teal: #2B6E6E;
+  --rust: #B5451B;
+  --fade-brown: #8A7B5C;
+
+  --font-display: "Alfa Slab One", serif;
+  --font-mono: "Courier Prime", monospace;
+  --font-label: "Oswald", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ---------- paper grain overlay ---------- */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 0, transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(0,0,0,0.025) 0, transparent 50%),
+    repeating-linear-gradient(0deg, rgba(31,27,22,0.015) 0px, rgba(31,27,22,0.015) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(90deg, rgba(31,27,22,0.012) 0px, rgba(31,27,22,0.012) 1px, transparent 1px, transparent 3px);
+}
+.grain-overlay::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  opacity: 0.35;
+}
+
+.poster {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  position: relative;
+}
+
+.hairline {
+  height: 0;
+  border-top: 2px solid var(--ink);
+  margin: 34px 0;
+  position: relative;
+}
+.hairline::after {
+  content: "";
+  position: absolute;
+  top: 4px; left: 0; right: 0;
+  height: 0;
+  border-top: 1px solid var(--fade-brown);
+}
+
+.section-label {
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--fade-brown);
+  text-align: center;
+  margin: 0 0 22px;
+  position: relative;
+}
+.section-label::before,
+.section-label::after {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 1px;
+  background: var(--fade-brown);
+  vertical-align: middle;
+  margin: 0 10px;
+}
+
+/* ================= LETTERHEAD ================= */
+.letterhead { padding-top: 30px; }
+.letterhead-inner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+}
+.seal { flex: 0 0 auto; color: var(--ink); }
+.letterhead-text { flex: 1 1 auto; min-width: 0; }
+.letterhead-eyebrow {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin: 0 0 4px;
+}
+.letterhead-title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 5.4vw, 28px);
+  line-height: 1.1;
+  margin: 0 0 8px;
+  letter-spacing: 0.5px;
+}
+.letterhead-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fade-brown);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.stamp {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  border: 3px solid var(--rust);
+  color: var(--rust);
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-align: center;
+  padding: 7px 9px;
+  line-height: 1.3;
+  transform: rotate(9deg);
+  border-radius: 4px;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+  display: none;
+}
+@media (min-width: 560px) {
+  .stamp { display: block; }
+}
+
+/* ================= HERO ================= */
+.hero { text-align: center; padding-top: 10px; }
+.hero-kicker {
+  font-family: var(--font-label);
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0 0 6px;
+}
+.hero-slogan {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 15vw, 108px);
+  line-height: 0.92;
+  margin: 0 0 22px;
+  color: var(--ink);
+  text-shadow: 3px 3px 0 rgba(213,160,23,0.35);
+  letter-spacing: 1px;
+}
+.hero-subhead {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto;
+  color: var(--ink);
+}
+.hero-divider {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+.hero-divider span {
+  width: 7px; height: 7px;
+  background: var(--rust);
+  transform: rotate(45deg);
+  display: inline-block;
+}
+.hero-divider span:nth-child(2) { background: var(--mustard); }
+.hero-divider span:nth-child(3) { background: var(--teal); }
+
+/* ================= INCIDENT COUNTER ================= */
+.counter-section { text-align: center; }
+
+.flip-board {
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 6px;
+  padding: 22px 18px 18px;
+  max-width: 380px;
+  margin: 0 auto;
+  box-shadow:
+    0 6px 0 rgba(0,0,0,0.15),
+    0 10px 24px rgba(31,27,22,0.35);
+  position: relative;
+  transform: rotate(-0.6deg);
+}
+.flip-caption {
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  color: var(--mustard);
+}
+.flip-digits {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.flip-digit {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 11vw, 62px);
+  background: #2a251d;
+  border: 1px solid #453d2f;
+  border-radius: 4px;
+  width: 1.15em;
+  padding: 4px 0;
+  display: inline-block;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.05);
+  position: relative;
+  transition: transform 0.15s ease;
+}
+.flip-digit::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(0,0,0,0.5);
+}
+.flip-digit.flipping {
+  animation: flipDigit 0.35s ease;
+}
+@keyframes flipDigit {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+.flip-footnote {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fade-brown);
+  margin: 14px 0 0;
+  letter-spacing: 0.5px;
+}
+
+.report-btn {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--cream);
+  background: var(--rust);
+  border: none;
+  padding: 16px 30px;
+  margin-top: 26px;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 0 4px 0 #7c2e10, 0 6px 14px rgba(0,0,0,0.25);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.report-btn:hover { filter: brightness(1.06); }
+.report-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #7c2e10, 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.incident-stub {
+  max-width: 380px;
+  margin: 26px auto 0;
+  background: #FBF6EA;
+  border: 1px solid var(--fade-brown);
+  padding: 18px 20px 22px;
+  text-align: left;
+  position: relative;
+  transform: rotate(1.2deg);
+  box-shadow: 2px 4px 10px rgba(31,27,22,0.18);
+}
+.incident-stub.hidden { display: none; }
+.stub-perf {
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 8px;
+  background-image: radial-gradient(circle, var(--cream) 3px, transparent 3.2px);
+  background-size: 14px 14px;
+  background-position: 0 -7px;
+}
+.stub-title {
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 4px 0 12px;
+  color: var(--rust);
+}
+.stub-row {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin: 6px 0;
+  display: flex;
+  gap: 8px;
+}
+.stub-row span:first-child {
+  font-weight: 700;
+  color: var(--fade-brown);
+  min-width: 60px;
+}
+.stub-stamp {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--teal);
+  border: 2px solid var(--teal);
+  padding: 4px 8px;
+  border-radius: 3px;
+  transform: rotate(-8deg);
+  opacity: 0.8;
+  mix-blend-mode: multiply;
+}
+
+.tally-line {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fade-brown);
+  margin-top: 28px;
+}
+.tally-number {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 16px;
+}
+.tally-marks {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--rust);
+  word-break: break-all;
+}
+
+/* ================= WARNING BADGES ================= */
+.badges-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (min-width: 620px) {
+  .badges-row { grid-template-columns: repeat(4, 1fr); }
+}
+
+.badge {
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  padding: 18px 10px;
+  text-align: center;
+  background: #FBF6EA;
+  box-shadow: 3px 3px 0 rgba(31,27,22,0.12);
+}
+.badge:nth-child(odd) { transform: rotate(-1.4deg); }
+.badge:nth-child(even) { transform: rotate(1.2deg); }
+.badge-rust { color: var(--rust); }
+.badge-teal { color: var(--teal); }
+.badge-mustard { color: var(--mustard); }
+
+.badge-icon { margin-bottom: 10px; }
+.badge-icon svg { display: block; margin: 0 auto; }
+
+.badge-label {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin: 0;
+}
+.badge-label span {
+  display: block;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--fade-brown);
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+/* ================= PLEDGE ================= */
+.pledge-card {
+  background: #FBF6EA;
+  border: 1px solid var(--fade-brown);
+  padding: 30px 26px;
+  position: relative;
+  box-shadow: 4px 6px 14px rgba(31,27,22,0.15);
+}
+.pledge-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--mustard);
+  pointer-events: none;
+  opacity: 0.6;
+}
+.pledge-text {
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  line-height: 1.85;
+  margin: 0 0 24px;
+}
+
+.signature-wrap { margin-bottom: 18px; }
+.sig-canvas {
+  width: 100%;
+  height: 130px;
+  background: var(--cream);
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  touch-action: none;
+  cursor: crosshair;
+  display: block;
+}
+.sig-line-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  font-family: var(--font-label);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--fade-brown);
+}
+.sig-clear {
+  font-family: var(--font-label);
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--fade-brown);
+  color: var(--fade-brown);
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.sig-clear:hover { color: var(--rust); border-color: var(--rust); }
+
+.pledge-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pledge-date {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fade-brown);
+  margin: 0;
+}
+.pledge-stamp {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--rust);
+  border: 2px solid var(--rust);
+  padding: 5px 10px;
+  border-radius: 3px;
+  transform: rotate(-6deg);
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+}
+
+/* ================= FOOTER ================= */
+.footer { padding-top: 6px; text-align: center; }
+.footer-fineprint {
+  font-family: var(--font-label);
+  font-size: 9.5px;
+  line-height: 1.7;
+  color: var(--fade-brown);
+  max-width: 560px;
+  margin: 0 auto 14px;
+  letter-spacing: 0.2px;
+}
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fade-brown);
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* ================= responsive tweaks ================= */
+@media (max-width: 420px) {
+  .letterhead-inner { flex-wrap: wrap; }
+  .stamp { position: static; margin-top: 12px; transform: rotate(-3deg); display: inline-block; }
+  .letterhead-title { font-size: 20px; }
+}
