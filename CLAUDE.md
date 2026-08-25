@@ -11,7 +11,10 @@ straight, like a real vintage government poster. Keep all copy PG-13.
 
 - Plain HTML/CSS/JS. No frontend framework, no build step.
 - Backend: Cloudflare Workers + Workers KV (free tier) for shared state across all
-  visitors. No auth, no per-user accounts — small trusted friend group, fully anonymous.
+  visitors. No auth, no per-user accounts — small trusted friend group. Reports and
+  pledges carry a hand-drawn signature (signed with mouse or finger on a canvas pad,
+  redrawn fresh each time, never persisted client-side) so it's visibly obvious the
+  streak is shared/multiplayer.
 - Frontend + `freethehand.com` domain are hosted on Vercel; `vercel.json` rewrites
   `/api/*` to the Cloudflare Worker so the frontend calls it same-origin.
 
@@ -19,8 +22,15 @@ straight, like a real vintage government poster. Keep all copy PG-13.
 
 Single JSON blob holding:
 - `streakStartDate` — resets to now whenever anyone reports a goon
-- `totalGoonsReported` — running tally
-- `log` — array of `{ timestamp, excuse }`, anonymous, no names attached
+- `totalGoonsReported` — running tally (no name attached — the streak/tally itself
+  stays anonymous even though individual entries below are signed)
+- `log` — array of `{ timestamp, excuse, signature }`
+- `pledges` — array of `{ signature, timestamp }`, one entry per signing, no dedup
+  (signing more than once is fine and in keeping with the joke)
+
+`signature` is a small PNG data URI captured from a canvas signature pad (drawn with
+mouse or finger), not text — validated server-side as `data:image/png;base64,...` and
+capped at `MAX_SIGNATURE_LENGTH` (200,000 chars) to keep a single KV value bounded.
 
 Frontend fetches this from the Worker API on load; never reads/writes localStorage for
 this data. Last-write-wins on conflicts is fine — this doesn't need to be bulletproof.
@@ -47,7 +57,8 @@ this data. Last-write-wins on conflicts is fine — this doesn't need to be bull
 ## Off-limits
 
 - Don't make content graphic/explicit — innuendo and dry humor only.
-- Don't add user accounts, names, or any way to attribute a report to a specific person —
-  anonymity is a deliberate design choice, not an oversight.
+- Don't add real user accounts/auth — signatures are hand-drawn on a canvas pad, redrawn
+  fresh each time, not an identity system. Never persist or prefill a signature via
+  localStorage on return visits.
 - Don't commit Cloudflare API tokens or wrangler secrets — use `.env` / wrangler secrets,
   keep them out of git.

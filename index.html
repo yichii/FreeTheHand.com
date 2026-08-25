@@ -75,6 +75,17 @@
       <p class="flip-footnote">Reset automatically upon confession</p>
     </div>
 
+    <div class="report-form">
+      <div class="signature-wrap">
+        <canvas id="reportSigCanvas" class="sig-canvas report-sig-canvas" width="600" height="90" aria-label="Signature pad — sign with mouse or finger to file this report"></canvas>
+        <div class="sig-line-label">
+          <span>Sign above with mouse or finger</span>
+          <button id="clearReportSig" class="sig-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <p id="reportError" class="form-error hidden">SIGNATURE REQUIRED — reports are not valid without one.</p>
+    </div>
+
     <button id="reportBtn" class="report-btn" type="button">
       REPORT A GOON
     </button>
@@ -84,6 +95,7 @@
       <p class="stub-title">GOON REPORT — FILED</p>
       <p class="stub-row"><span>DATE:</span> <span id="stubDate"></span></p>
       <p class="stub-row"><span>CAUSE:</span> <span id="stubExcuse"></span></p>
+      <p class="stub-row stub-row-sig"><span>SIGNED:</span> <img id="stubSignedBy" class="stub-signature-img" alt="Signature"></p>
       <p class="stub-row"><span>STATUS:</span> <span>COUNTER RESET TO ZERO</span></p>
       <div class="stub-stamp" aria-hidden="true">ON FILE</div>
     </div>
@@ -146,15 +158,27 @@
         a provocation, and that Tuesdays are not, in fact, an occasion.
       </p>
       <div class="signature-wrap">
-        <canvas id="sigCanvas" class="sig-canvas" width="600" height="140" aria-label="Signature pad — draw your signature with mouse or finger"></canvas>
+        <canvas id="sigCanvas" class="sig-canvas" width="600" height="140" aria-label="Signature pad — sign your pledge with mouse or finger"></canvas>
         <div class="sig-line-label">
           <span>Sign above with mouse or finger</span>
           <button id="clearSig" class="sig-clear" type="button">Clear</button>
         </div>
       </div>
+
+      <p id="pledgeError" class="form-error hidden">SIGNATURE REQUIRED — pledges are not valid without one.</p>
+
+      <button id="pledgeSubmitBtn" class="report-btn pledge-submit-btn" type="button">
+        FILE PLEDGE
+      </button>
+
       <div class="pledge-footer">
         <p class="pledge-date">Dated: <span id="pledgeDate"></span></p>
         <div class="pledge-stamp" aria-hidden="true">ON RECORD</div>
+      </div>
+
+      <div id="pledgeLedger" class="pledge-ledger hidden">
+        <p class="incident-log-label">Signed To Date — Institute Ledger</p>
+        <ul id="pledgeLedgerList" class="pledge-ledger-list"></ul>
       </div>
     </div>
   </section>

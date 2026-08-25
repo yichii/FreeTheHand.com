@@ -96,6 +96,9 @@
     entries.forEach(function (entry) {
       var li = document.createElement("li");
 
+      var topRow = document.createElement("div");
+      topRow.className = "log-top-row";
+
       var excuseSpan = document.createElement("span");
       excuseSpan.className = "log-excuse";
       excuseSpan.textContent = entry.excuse;
@@ -104,7 +107,54 @@
       timeSpan.className = "log-time";
       timeSpan.textContent = timeAgo(entry.timestamp);
 
-      li.appendChild(excuseSpan);
+      topRow.appendChild(excuseSpan);
+      topRow.appendChild(timeSpan);
+      li.appendChild(topRow);
+
+      if (entry.signature) {
+        var sigRow = document.createElement("div");
+        sigRow.className = "log-sig-row";
+
+        var sigLabel = document.createElement("span");
+        sigLabel.className = "log-sig-label";
+        sigLabel.textContent = "Signed:";
+
+        var sigImg = document.createElement("img");
+        sigImg.className = "log-signature-img";
+        sigImg.src = entry.signature;
+        sigImg.alt = "Signature";
+
+        sigRow.appendChild(sigLabel);
+        sigRow.appendChild(sigImg);
+        li.appendChild(sigRow);
+      }
+
+      list.appendChild(li);
+    });
+  }
+
+  function renderPledgeLedger(pledges) {
+    var section = document.getElementById("pledgeLedger");
+    var list = document.getElementById("pledgeLedgerList");
+    list.innerHTML = "";
+    if (!pledges || pledges.length === 0) {
+      section.classList.add("hidden");
+      return;
+    }
+    section.classList.remove("hidden");
+    pledges.forEach(function (entry) {
+      var li = document.createElement("li");
+
+      var img = document.createElement("img");
+      img.className = "pledge-ledger-img";
+      img.src = entry.signature;
+      img.alt = "Signature";
+
+      var timeSpan = document.createElement("span");
+      timeSpan.className = "pledge-ledger-time";
+      timeSpan.textContent = timeAgo(entry.timestamp);
+
+      li.appendChild(img);
       li.appendChild(timeSpan);
       list.appendChild(li);
     });
@@ -115,6 +165,7 @@
     refreshTallyMarks(state.totalGoonsReported);
     renderDays(daysSince(state.streakStartDate), !!animateDays);
     renderLog(state.log);
+    renderPledgeLedger(state.pledges);
   }
 
   function fetchState() {
@@ -134,16 +185,105 @@
   fetchState();
   setInterval(fetchState, POLL_INTERVAL_MS);
 
+  /* ---------------- signature pad (shared by report + pledge) ---------------- */
+
+  function createSignaturePad(canvas, clearBtn) {
+    var ctx = canvas.getContext("2d");
+    var drawing = false;
+    var dirty = false;
+    var lastX = 0, lastY = 0;
+
+    function resize() {
+      // Cap the backing-store ratio so a retina screen doesn't blow up the
+      // exported PNG's size — quality is plenty at 2x for a signature.
+      var ratio = Math.min(window.devicePixelRatio || 1, 2);
+      var rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#1F1B16";
+    }
+
+    function getPos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDraw(e) {
+      drawing = true;
+      var pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+      e.preventDefault();
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      var pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      lastX = pos.x;
+      lastY = pos.y;
+      dirty = true;
+      e.preventDefault();
+    }
+
+    function endDraw() {
+      drawing = false;
+    }
+
+    function clear() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      dirty = false;
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    window.addEventListener("mouseup", endDraw);
+
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", endDraw);
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", clear);
+    }
+
+    return {
+      isEmpty: function () { return !dirty; },
+      toDataURL: function () { return canvas.toDataURL("image/png"); },
+      clear: clear
+    };
+  }
+
   /* ---------------- report an incident ---------------- */
 
   var reportBtn = document.getElementById("reportBtn");
+  var reportError = document.getElementById("reportError");
   var stub = document.getElementById("incidentStub");
   var stubDate = document.getElementById("stubDate");
   var stubExcuse = document.getElementById("stubExcuse");
+  var stubSignedBy = document.getElementById("stubSignedBy");
 
-  function showStub(dateText, excuseText) {
+  var reportSigPad = createSignaturePad(
+    document.getElementById("reportSigCanvas"),
+    document.getElementById("clearReportSig")
+  );
+
+  function showStub(dateText, excuseText, signatureDataUrl) {
     stubDate.textContent = dateText;
     stubExcuse.textContent = excuseText;
+    stubSignedBy.src = signatureDataUrl || "";
     stub.classList.remove("hidden");
     stub.style.animation = "none";
     void stub.offsetWidth;
@@ -151,8 +291,19 @@
   }
 
   reportBtn.addEventListener("click", function () {
+    if (reportSigPad.isEmpty()) {
+      reportError.classList.remove("hidden");
+      return;
+    }
+    reportError.classList.add("hidden");
+    var signature = reportSigPad.toDataURL();
+
     reportBtn.disabled = true;
-    fetch(API_BASE + "/report", { method: "POST" })
+    fetch(API_BASE + "/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ signature: signature })
+    })
       .then(function (res) {
         if (!res.ok) throw new Error("bad response: " + res.status);
         return res.json();
@@ -162,12 +313,14 @@
         var latest = state.log[0];
         showStub(
           formatDate(latest ? new Date(latest.timestamp) : new Date()),
-          latest ? latest.excuse : "Unrecorded."
+          latest ? latest.excuse : "Unrecorded.",
+          latest ? latest.signature : signature
         );
+        reportSigPad.clear();
       })
       .catch(function (err) {
         console.error("Failed to file goon report:", err);
-        showStub(formatDate(new Date()), "FILING FAILED — SYSTEM OFFLINE");
+        showStub(formatDate(new Date()), "FILING FAILED — SYSTEM OFFLINE", signature);
       })
       .then(function () {
         reportBtn.disabled = false;
@@ -178,71 +331,50 @@
 
   document.getElementById("pledgeDate").textContent = formatDate(new Date());
 
-  /* ---------------- signature canvas ---------------- */
+  /* ---------------- pledge signing ---------------- */
 
-  var canvas = document.getElementById("sigCanvas");
-  var ctx = canvas.getContext("2d");
-  var drawing = false;
-  var lastX = 0, lastY = 0;
+  var pledgeSubmitBtn = document.getElementById("pledgeSubmitBtn");
+  var pledgeError = document.getElementById("pledgeError");
 
-  function resizeCanvas() {
-    var ratio = window.devicePixelRatio || 1;
-    var rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-    ctx.scale(ratio, ratio);
-    ctx.lineWidth = 2.2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#1F1B16";
-  }
+  var pledgeSigPad = createSignaturePad(
+    document.getElementById("sigCanvas"),
+    document.getElementById("clearSig")
+  );
 
-  window.addEventListener("resize", function () {
-    resizeCanvas();
-  });
-  resizeCanvas();
+  var PLEDGE_SIGNATURE_REQUIRED_TEXT = pledgeError.textContent;
+  var PLEDGE_FILING_FAILED_TEXT = "FILING FAILED — SYSTEM OFFLINE. Try again in a moment.";
 
-  function getPos(e) {
-    var rect = canvas.getBoundingClientRect();
-    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: clientX - rect.left, y: clientY - rect.top };
-  }
+  pledgeSubmitBtn.addEventListener("click", function () {
+    if (pledgeSigPad.isEmpty()) {
+      pledgeError.textContent = PLEDGE_SIGNATURE_REQUIRED_TEXT;
+      pledgeError.classList.remove("hidden");
+      return;
+    }
+    pledgeError.classList.add("hidden");
+    var signature = pledgeSigPad.toDataURL();
 
-  function startDraw(e) {
-    drawing = true;
-    var pos = getPos(e);
-    lastX = pos.x;
-    lastY = pos.y;
-    e.preventDefault();
-  }
-
-  function draw(e) {
-    if (!drawing) return;
-    var pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    lastX = pos.x;
-    lastY = pos.y;
-    e.preventDefault();
-  }
-
-  function endDraw() {
-    drawing = false;
-  }
-
-  canvas.addEventListener("mousedown", startDraw);
-  canvas.addEventListener("mousemove", draw);
-  window.addEventListener("mouseup", endDraw);
-
-  canvas.addEventListener("touchstart", startDraw, { passive: false });
-  canvas.addEventListener("touchmove", draw, { passive: false });
-  canvas.addEventListener("touchend", endDraw);
-
-  document.getElementById("clearSig").addEventListener("click", function () {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pledgeSubmitBtn.disabled = true;
+    fetch(API_BASE + "/pledge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ signature: signature })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad response: " + res.status);
+        return res.json();
+      })
+      .then(function (state) {
+        renderPledgeLedger(state.pledges);
+        pledgeSigPad.clear();
+      })
+      .catch(function (err) {
+        console.error("Failed to file pledge:", err);
+        pledgeError.textContent = PLEDGE_FILING_FAILED_TEXT;
+        pledgeError.classList.remove("hidden");
+      })
+      .then(function () {
+        pledgeSubmitBtn.disabled = false;
+      });
   });
 
 })();
