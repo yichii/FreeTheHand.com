@@ -22,6 +22,9 @@ Desktop.ini
 .mf/
 wrangler.toml.bak
 
+# Vercel
+.vercel/
+
 # Node tooling (in case anything gets added later)
 node_modules/
 npm-debug.log*

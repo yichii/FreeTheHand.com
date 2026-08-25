@@ -1,56 +1,44 @@
 (function () {
   "use strict";
 
-  var STORAGE_KEY_START = "fth_lastIncidentDate";
-  var STORAGE_KEY_TOTAL = "fth_totalIncidents";
+  // The site is hosted on Vercel; vercel.json rewrites /api/* to the
+  // Cloudflare Worker, so this stays same-origin. If that rewrite is ever
+  // removed, point this at the Worker's workers.dev URL directly instead
+  // (CORS is left open there for exactly that case).
+  var API_BASE = "/api";
 
   var MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-  var EXCUSES = [
-    "Distracted by a podcast.",
-    "Thought about it too hard.",
-    "Saw a doorknob.",
-    "Tuesday.",
-    "The WiFi went out.",
-    "Read a spicy group chat.",
-    "Bored during a Zoom call.",
-    "Blamed the full moon.",
-    "Ergonomic curiosity got the better of me.",
-    "Momentary lapse in supervision.",
-    "The cat left the room.",
-    "Forgot the pledge existed.",
-    "A gentle breeze.",
-    "It was right there.",
-    "Peer pressure from absolutely no one."
-  ];
-
-  function todayAtMidnight() {
-    var d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
+  var POLL_INTERVAL_MS = 60 * 1000;
 
   function daysBetween(a, b) {
     return Math.floor((b - a) / MS_PER_DAY);
   }
 
-  function getLastIncidentDate() {
-    var stored = localStorage.getItem(STORAGE_KEY_START);
-    if (!stored) {
-      var now = todayAtMidnight();
-      localStorage.setItem(STORAGE_KEY_START, now.getTime().toString());
-      return now;
-    }
-    return new Date(parseInt(stored, 10));
+  function daysSince(isoDateString) {
+    var start = new Date(isoDateString);
+    start.setHours(0, 0, 0, 0);
+    var now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return daysBetween(start, now);
   }
 
-  function getTotalIncidents() {
-    var stored = localStorage.getItem(STORAGE_KEY_TOTAL);
-    return stored ? parseInt(stored, 10) : 0;
+  function formatDate(d) {
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
   }
 
-  function setTotalIncidents(n) {
-    localStorage.setItem(STORAGE_KEY_TOTAL, n.toString());
+  function timeAgo(isoDateString) {
+    var diffMs = Date.now() - new Date(isoDateString).getTime();
+    var mins = Math.round(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + (mins === 1 ? " min ago" : " mins ago");
+    var hours = Math.round(mins / 60);
+    if (hours < 24) return hours + (hours === 1 ? " hr ago" : " hrs ago");
+    var days = Math.round(hours / 24);
+    return days + (days === 1 ? " day ago" : " days ago");
   }
 
   /* ---------------- flip counter display ---------------- */
@@ -86,13 +74,7 @@
     }
   }
 
-  function currentDaysSinceIncident() {
-    var last = getLastIncidentDate();
-    return daysBetween(last, todayAtMidnight());
-  }
-
-  function refreshTallyMarks() {
-    var total = getTotalIncidents();
+  function refreshTallyMarks(total) {
     var marks = document.getElementById("tallyMarks");
     var groupsOfFive = Math.floor(total / 5);
     var remainder = total % 5;
@@ -102,9 +84,55 @@
     marks.textContent = total > 0 ? out.trim() : "";
   }
 
-  document.getElementById("totalIncidents").textContent = getTotalIncidents();
-  refreshTallyMarks();
-  renderDays(currentDaysSinceIncident(), false);
+  function renderLog(entries) {
+    var section = document.getElementById("incidentLog");
+    var list = document.getElementById("incidentLogList");
+    list.innerHTML = "";
+    if (!entries || entries.length === 0) {
+      section.classList.add("hidden");
+      return;
+    }
+    section.classList.remove("hidden");
+    entries.forEach(function (entry) {
+      var li = document.createElement("li");
+
+      var excuseSpan = document.createElement("span");
+      excuseSpan.className = "log-excuse";
+      excuseSpan.textContent = entry.excuse;
+
+      var timeSpan = document.createElement("span");
+      timeSpan.className = "log-time";
+      timeSpan.textContent = timeAgo(entry.timestamp);
+
+      li.appendChild(excuseSpan);
+      li.appendChild(timeSpan);
+      list.appendChild(li);
+    });
+  }
+
+  function applyState(state, animateDays) {
+    document.getElementById("totalIncidents").textContent = state.totalGoonsReported;
+    refreshTallyMarks(state.totalGoonsReported);
+    renderDays(daysSince(state.streakStartDate), !!animateDays);
+    renderLog(state.log);
+  }
+
+  function fetchState() {
+    return fetch(API_BASE + "/state")
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad response: " + res.status);
+        return res.json();
+      })
+      .then(function (state) {
+        applyState(state, false);
+      })
+      .catch(function (err) {
+        console.error("Failed to load shared tally:", err);
+      });
+  }
+
+  fetchState();
+  setInterval(fetchState, POLL_INTERVAL_MS);
 
   /* ---------------- report an incident ---------------- */
 
@@ -113,39 +141,38 @@
   var stubDate = document.getElementById("stubDate");
   var stubExcuse = document.getElementById("stubExcuse");
 
-  function formatDate(d) {
-    return d.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric"
-    });
-  }
-
-  reportBtn.addEventListener("click", function () {
-    var now = todayAtMidnight();
-    localStorage.setItem(STORAGE_KEY_START, now.getTime().toString());
-
-    var total = getTotalIncidents() + 1;
-    setTotalIncidents(total);
-    document.getElementById("totalIncidents").textContent = total;
-    refreshTallyMarks();
-
-    renderDays(0, true);
-
-    var excuse = EXCUSES[Math.floor(Math.random() * EXCUSES.length)];
-    stubDate.textContent = formatDate(new Date());
-    stubExcuse.textContent = excuse;
+  function showStub(dateText, excuseText) {
+    stubDate.textContent = dateText;
+    stubExcuse.textContent = excuseText;
     stub.classList.remove("hidden");
     stub.style.animation = "none";
     void stub.offsetWidth;
     stub.style.animation = "";
+  }
+
+  reportBtn.addEventListener("click", function () {
+    reportBtn.disabled = true;
+    fetch(API_BASE + "/report", { method: "POST" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("bad response: " + res.status);
+        return res.json();
+      })
+      .then(function (state) {
+        applyState(state, true);
+        var latest = state.log[0];
+        showStub(
+          formatDate(latest ? new Date(latest.timestamp) : new Date()),
+          latest ? latest.excuse : "Unrecorded."
+        );
+      })
+      .catch(function (err) {
+        console.error("Failed to file goon report:", err);
+        showStub(formatDate(new Date()), "FILING FAILED — SYSTEM OFFLINE");
+      })
+      .then(function () {
+        reportBtn.disabled = false;
+      });
   });
-
-  /* ---------------- keep counter fresh if left open overnight ---------------- */
-
-  setInterval(function () {
-    renderDays(currentDaysSinceIncident(), false);
-  }, 60 * 1000);
 
   /* ---------------- pledge date ---------------- */
 
@@ -161,10 +188,6 @@
   function resizeCanvas() {
     var ratio = window.devicePixelRatio || 1;
     var rect = canvas.getBoundingClientRect();
-    var imgData = null;
-    if (canvas.width > 0 && canvas.height > 0) {
-      try { imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); } catch (e) {}
-    }
     canvas.width = rect.width * ratio;
     canvas.height = rect.height * ratio;
     ctx.scale(ratio, ratio);

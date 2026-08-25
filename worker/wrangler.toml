@@ -1,0 +1,20 @@
+name = "freethehand-api"
+main = "src/index.js"
+compatibility_date = "2026-08-25"
+workers_dev = true
+
+# Bind the KV namespace that stores the single shared state blob.
+# One-time setup:
+#   npx wrangler kv namespace create GOON_STATE
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "GOON_STATE"
+id = "c627f3d286a643d297a3bb07efc1278c"
+
+# If freethehand.com's DNS is ever moved onto this Cloudflare account, you can
+# route the Worker onto the same domain instead — same-origin calls, zero
+# CORS setup. Until then this deploys to a *.workers.dev URL (CORS is left
+# open in src/index.js so that works fine too).
+# routes = [
+#   { pattern = "freethehand.com/api/*", zone_name = "freethehand.com" }
+# ]

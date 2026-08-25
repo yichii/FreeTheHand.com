@@ -14,10 +14,12 @@ seriously by anyone, including search engines (see `robots.txt`).
 ## Stack
 
 - Plain HTML/CSS/JS — no framework, no build step.
-- Frontend deploys to Cloudflare Pages.
-- Shared state (streak counter, total goons reported, anonymous excuse log) is intended
-  to live in Cloudflare Workers + Workers KV, so the counter is the same for everyone
-  instead of per-browser. See `CLAUDE.md` for the full design.
+- Frontend + domain are hosted on Vercel.
+- Shared state (streak counter, total goons reported, anonymous excuse log) lives in
+  Cloudflare Workers + Workers KV, so the counter is the same for everyone instead of
+  per-browser. Deployed at `https://freethehand-api.freethehand-worker.workers.dev`.
+  `vercel.json` rewrites `/api/*` to that Worker so the frontend can call it same-origin.
+  See `CLAUDE.md` for the full design.
 
 ## Running locally
 
@@ -30,32 +32,54 @@ python3 -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
-## Deploying the frontend (Cloudflare Pages)
+## Deploying the frontend (Vercel)
 
-```bash
-npx wrangler pages deploy . --project-name=freethehand
-```
+The site and `freethehand.com` domain are already set up on Vercel, connected to this
+repo for deploy-on-push — no build command needed, it's a static file deploy. `vercel.json`
+carries the `/api/*` rewrite to the Worker; make sure it stays committed.
 
-Or connect the GitHub repo to a Cloudflare Pages project in the dashboard for
-deploy-on-push — either way, it's a static file deploy, no build command needed.
+To deploy manually instead: `npx vercel --prod` from the repo root (requires `vercel login`
+once).
 
 ## Deploying the backend (Cloudflare Workers + KV)
 
-The shared counter lives behind a small Worker backed by a KV namespace. From the
-`worker/` directory:
+The shared counter lives behind a small Worker (`worker/src/index.js`) backed by a KV
+namespace holding one JSON blob: `{ streakStartDate, totalGoonsReported, log }`. Already
+deployed; to redeploy after changes, from the `worker/` directory:
 
 ```bash
-# One-time: create the KV namespace and note the returned id
-npx wrangler kv namespace create GOON_STATE
-
-# Add the returned id to worker/wrangler.toml under [[kv_namespaces]]
-
-# Local dev
-npx wrangler dev
-
-# Deploy
+npm install       # first time only — installs wrangler locally
+npx wrangler login # first time only — authorizes this machine
 npx wrangler deploy
 ```
+
+The KV namespace (binding `GOON_STATE`) and its id in `worker/wrangler.toml` are already
+set up. If you ever need to recreate it: `npx wrangler kv namespace create GOON_STATE`,
+then paste the returned id into `worker/wrangler.toml`.
+
+The Worker exposes two endpoints, open with no auth (small trusted friend group):
+
+- `GET /api/state` — current shared state (initializes a default on first call)
+- `POST /api/report` — resets the streak, bumps the total, appends a log entry with a
+  random deadpan excuse (picked server-side from the list in `worker/src/index.js`)
+
+`freethehand.com` is on Vercel, not this Cloudflare account, so a Cloudflare Worker route
+(same-domain, zero-CORS) isn't an option here — see the commented `routes` block in
+`worker/wrangler.toml` if that ever changes. Instead, `vercel.json`'s rewrite makes
+`/api/*` on the Vercel-hosted frontend proxy to the Worker's `workers.dev` URL, so
+`script.js` still calls same-origin `/api/...` (`API_BASE = "/api"`). CORS is also left
+wide open in the Worker as a fallback, in case the rewrite is ever removed and the
+frontend needs to call the `workers.dev` URL directly.
+
+To inspect or reset the live shared state directly:
+
+```bash
+npx wrangler kv key get --remote --namespace-id=<id> state
+npx wrangler kv key put --remote --namespace-id=<id> state --path=./some-state.json
+```
+
+(Omit `--remote` and it writes to wrangler's local dev simulator instead of production —
+easy to do by accident.)
 
 Secrets (like any Cloudflare API tokens used outside of Wrangler's own auth) should be
 set with `npx wrangler secret put <NAME>`, never committed. See `.gitignore` for what's

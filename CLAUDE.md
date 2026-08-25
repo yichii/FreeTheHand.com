@@ -12,7 +12,8 @@ straight, like a real vintage government poster. Keep all copy PG-13.
 - Plain HTML/CSS/JS. No frontend framework, no build step.
 - Backend: Cloudflare Workers + Workers KV (free tier) for shared state across all
   visitors. No auth, no per-user accounts — small trusted friend group, fully anonymous.
-- Deployed via Cloudflare Pages (frontend) + Workers (API).
+- Frontend + `freethehand.com` domain are hosted on Vercel; `vercel.json` rewrites
+  `/api/*` to the Cloudflare Worker so the frontend calls it same-origin.
 
 ## Shared state (Workers KV)
 
