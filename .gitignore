@@ -1,0 +1,29 @@
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor junk
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Cloudflare / Wrangler
+.wrangler/
+.mf/
+wrangler.toml.bak
+
+# Node tooling (in case anything gets added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
